@@ -9,8 +9,8 @@ class WebCrawler(private val seedURL: String) {
 
     fun start() {
         val seedHTMLText = readTextFromURL(url = seedURL)
-        val urls = htmlParser.getURLs(htmlText = seedHTMLText)
-        println(urls)
+        val urls = htmlParser.getHyperlinks(htmlText = seedHTMLText)
+        println(urls.toSet())
     }
 
     private fun readTextFromURL(url: String) : String {
