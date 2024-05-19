@@ -1,5 +1,8 @@
 package org.example
 
+
 fun main() {
-    println("Hello World!")
+    val crawler = WebCrawler(seedURL = "https://kotlinlang.org/")
+    crawler.start()
+
 }
