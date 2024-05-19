@@ -1,8 +1,5 @@
 package org.example
 
-// Group that matches the URL in the a-tag
-private const val URL_GROUP_IDX = 2
-
 enum class Protocol {
     HTTP,
     HTTPS,
@@ -22,6 +19,11 @@ class HTMLParser {
 
     private val aTagRegexPattern = Regex(pattern = "<a[^>]*href=(['\"])(http.+?)\\1")
 
+    companion object {
+        // Group that matches the URL in the a-tag
+        private const val URL_GROUP_IDX = 2
+    }
+
     fun getHyperlinks(htmlText: String) : Sequence<Hyperlink> {
         return getURLs(htmlText = htmlText).map { buildHyperlink(it) }
     }
@@ -35,9 +37,8 @@ class HTMLParser {
             .mapNotNull { it.groups[URL_GROUP_IDX]?.value }
     }
 
-    private fun buildHyperlink(url: String) : Hyperlink {
+    fun buildHyperlink(url: String) : Hyperlink {
         val urlWithoutProtocol = url.substringAfter("://")
-
         return Hyperlink(
             url = url,
             protocol = Protocol.valueOf(value = url.substringBefore(':').uppercase()),
@@ -58,6 +59,7 @@ class HTMLParser {
             urlWithoutProtocol.substringAfter('.').substringBefore('.')
         } else urlWithoutProtocol.substringBefore('.')
     }
+
     private fun parseTopLevelDomain(urlWithoutProtocol: String) : String {
         return if (hasSubdomain(urlWithoutProtocol = urlWithoutProtocol)) {
             urlWithoutProtocol.substringAfter('.').substringAfter('.').substringBefore('/')
@@ -67,5 +69,4 @@ class HTMLParser {
     private fun hasSubdomain(urlWithoutProtocol: String) : Boolean {
         return urlWithoutProtocol.substringBefore('/').count {it == '.'} > 1
     }
-
 }
