@@ -11,29 +11,33 @@ class WebCrawler(private val seedURL: String) {
         val seedHyperlink = htmlParser.buildHyperlink(url = seedURL)
         val linkQueue = ArrayDeque(elements = setOf(seedHyperlink))
 
-        val collectedRootHyperlinks: MutableSet<Hyperlink> = mutableSetOf()
+        val collectedHyperlinks: MutableSet<Hyperlink> = mutableSetOf()
         val collectedRootDomains: MutableSet<String> = mutableSetOf()
 
 
         while (linkQueue.isNotEmpty()) {
-            if (collectedRootDomains.count() > 5) break
-
+            if (collectedHyperlinks.count() > 50) break
             val link = linkQueue.removeFirst()
+
+            // Skip already collected hyperlinks
+            if (link in collectedHyperlinks) continue
+
             val htmlText = readTextFromURL(url = link.url) ?: continue
 
             val urls = htmlParser.getHyperlinks(htmlText = htmlText).toSet()
             urls.forEach { linkQueue.add(it) }
 
-            collectedRootHyperlinks.add(element = link)
+            collectedHyperlinks.add(element = link)
             collectedRootDomains.add(element = link.rootDomain)
 
             println("Current Link: ${link.url}")
+            println("Current hyperlink object: $link")
             println("${linkQueue.count()} hyperlinks are Currently queued ...")
         }
 
-        val protocolStats = getHyperlinkQuantityStats(hyperlinks = collectedRootHyperlinks) { it.protocol }
-        val topLevelDomainStats = getHyperlinkQuantityStats(hyperlinks = collectedRootHyperlinks) { it.topLevelDomain }
-        val rootDomainStats = getHyperlinkQuantityStats(hyperlinks = collectedRootHyperlinks) { it.rootDomain}
+        val protocolStats = getHyperlinkQuantityStats(hyperlinks = collectedHyperlinks) { it.protocol }
+        val topLevelDomainStats = getHyperlinkQuantityStats(hyperlinks = collectedHyperlinks) { it.topLevelDomain }
+        val rootDomainStats = getHyperlinkQuantityStats(hyperlinks = collectedHyperlinks) { it.rootDomain}
 
         println("\n")
         println("+++++++++++++++++ Statistics +++++++++++++++++")

@@ -12,7 +12,16 @@ data class Hyperlink(
     val domain: String,
     val topLevelDomain: String,
     val rootDomain: String = "${domain}.${topLevelDomain}",
-)
+    val fullDomain: String = "${formatSubdomains(subdomains = subdomains)}.${domain}.${topLevelDomain}"
+) {
+    companion object {
+        fun formatSubdomains(subdomains : Set<String>) : String {
+            return if (subdomains.isNotEmpty()) {
+                subdomains.joinToString(separator = ".", postfix = ".")
+            } else ""
+        }
+    }
+}
 
 
 class HTMLParser {
