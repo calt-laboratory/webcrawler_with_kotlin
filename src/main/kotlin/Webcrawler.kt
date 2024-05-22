@@ -12,15 +12,16 @@ class WebCrawler(private val seedURL: String) {
         val linkQueue = ArrayDeque(elements = setOf(seedHyperlink))
 
         val collectedHyperlinks: MutableSet<Hyperlink> = mutableSetOf()
-        val collectedRootDomains: MutableSet<String> = mutableSetOf()
+        val collectedDomains: MutableSet<String> = mutableSetOf()
 
 
         while (linkQueue.isNotEmpty()) {
-            if (collectedHyperlinks.count() > 50) break
+            if (collectedHyperlinks.count() > 25) break
             val link = linkQueue.removeFirst()
 
-            // Skip already collected hyperlinks
+            // Skip already collected hyperlinks and full domains
             if (link in collectedHyperlinks) continue
+            if (link.fullDomain in collectedDomains) continue
 
             val htmlText = readTextFromURL(url = link.url) ?: continue
 
@@ -28,10 +29,9 @@ class WebCrawler(private val seedURL: String) {
             urls.forEach { linkQueue.add(it) }
 
             collectedHyperlinks.add(element = link)
-            collectedRootDomains.add(element = link.rootDomain)
+            collectedDomains.add(element = link.fullDomain)
 
             println("Current Link: ${link.url}")
-            println("Current hyperlink object: $link")
             println("${linkQueue.count()} hyperlinks are Currently queued ...")
         }
 
@@ -58,6 +58,11 @@ class WebCrawler(private val seedURL: String) {
     }
 
     private fun getHyperlinkQuantityStats(hyperlinks: Set<Hyperlink>, key: (Hyperlink) -> Any) : Map<String, Int> {
-        return hyperlinks.groupBy { key(it).toString() }.mapValues { it.value.count() }
+        return hyperlinks
+            .groupBy { key(it).toString() }
+            .mapValues { it.value.count() }
+            .toList()
+            .sortedByDescending { (_ , value) -> value }
+            .toMap()
     }
 }
