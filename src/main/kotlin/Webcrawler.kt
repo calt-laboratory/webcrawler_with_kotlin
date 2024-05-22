@@ -7,7 +7,7 @@ class WebCrawler(private val seedURL: String) {
 
     private val htmlParser = HTMLParser()
 
-    fun run() {
+    fun run(maxURLsCollected: Int) {
         val seedHyperlink = htmlParser.buildHyperlink(url = seedURL)
         val linkQueue = ArrayDeque(elements = setOf(seedHyperlink))
 
@@ -16,12 +16,11 @@ class WebCrawler(private val seedURL: String) {
 
 
         while (linkQueue.isNotEmpty()) {
-            if (collectedHyperlinks.count() > 25) break
+            if (collectedHyperlinks.count() > maxURLsCollected) break
             val link = linkQueue.removeFirst()
 
             // Skip already collected hyperlinks and full domains
             if (link in collectedHyperlinks) continue
-            if (link.fullDomain in collectedDomains) continue
 
             val htmlText = readTextFromURL(url = link.url) ?: continue
 

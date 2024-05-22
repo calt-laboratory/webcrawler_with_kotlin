@@ -61,7 +61,7 @@ class HTMLParser {
         val urlWithoutProtocol = url.substringAfter("://")
         return Hyperlink(
             url = url,
-            protocol = Protocol.valueOf(value = url.substringBefore(':').uppercase()),
+            protocol = parseProtocol(url = url),
             subdomains = parseSubdomains(urlWithoutProtocol = urlWithoutProtocol),
             domain =  parseDomain(urlWithoutProtocol = urlWithoutProtocol),
             topLevelDomain = parseTopLevelDomain(urlWithoutProtocol = urlWithoutProtocol),
@@ -69,7 +69,16 @@ class HTMLParser {
     }
 
     /**
-     * Parses subdomains (http, https) from a URL without the protocol.
+     * Parses the protocol from a given URL
+     * @param url: URL
+     * @return Protocol
+     */
+    private fun parseProtocol(url: String) : Protocol {
+        return Protocol.valueOf(value = url.substringBefore(':').uppercase())
+    }
+
+    /**
+     * Parses subdomains from a URL without the protocol.
      * @param urlWithoutProtocol: URL without protocol
      * @return Set of subdomains or empty set
     */
@@ -96,13 +105,14 @@ class HTMLParser {
      * @return Top level domain
      */
     private fun parseTopLevelDomain(urlWithoutProtocol: String) : String {
-        return if (hasSubdomain(urlWithoutProtocol = urlWithoutProtocol)) {
-            urlWithoutProtocol.substringAfter('.').substringAfter('.').substringBefore('/')
-        } else urlWithoutProtocol.substringAfter('.').substringBefore('/')
+        return urlWithoutProtocol
+            .substringBefore('/')
+            .substringBefore('?')
+            .substringAfterLast('/')
     }
 
     /**
-     * Checks if subdomain exists in a URL without the protocol.
+     * Checks if subdomain exists in a URL (without protocol).
      * @param urlWithoutProtocol: URL without protocol
      * @return True or false
      */
